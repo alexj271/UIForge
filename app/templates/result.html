@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UIForge — Result</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e8e8e8; padding: 32px; }
+    h1 { font-size: 1.4rem; margin-bottom: 24px; }
+    a { color: #4f6ef7; text-decoration: none; font-size: 0.9rem; }
+    .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .panel { background: #1a1a1a; border: 1px solid #2e2e2e; border-radius: 10px; padding: 20px; }
+    .panel h2 { font-size: 0.95rem; color: #aaa; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .original-wrap { position: relative; display: inline-block; }
+    .original-wrap img { max-width: 100%; border-radius: 6px; display: block; }
+    .bbox {
+      position: absolute;
+      border: 2px solid #4f6ef7;
+      border-radius: 3px;
+      pointer-events: none;
+    }
+    .bbox-label {
+      position: absolute;
+      top: -18px;
+      left: 0;
+      background: #4f6ef7;
+      color: white;
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .components { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .component-card { background: #111; border: 1px solid #2e2e2e; border-radius: 8px; padding: 10px; width: 140px; }
+    .component-card img { width: 100%; border-radius: 4px; margin-bottom: 6px; }
+    .component-card .meta { font-size: 0.75rem; color: #888; }
+    .component-card .type-badge { font-size: 0.7rem; background: #2a2e4a; color: #7b9cff; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+    .code-block { background: #111; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.78rem; font-family: monospace; white-space: pre; color: #c8d8f8; margin-top: 0; max-height: 520px; overflow-y: auto; }
+    .full-width { grid-column: 1 / -1; }
+    .back { margin-bottom: 20px; display: block; }
+  </style>
+</head>
+<body>
+  <a href="/" class="back">← New analysis</a>
+  <h1>Decomposition result — {{ ast.source_image }}</h1>
+
+  <div class="layout">
+
+    <!-- Original with bounding boxes -->
+    <div class="panel">
+      <h2>Original · {{ ast.components | length }} components detected</h2>
+      <div class="original-wrap" id="img-wrap">
+        <img id="orig" src="/uploads/{{ ast.source_image }}" />
+        {% for comp in ast.components %}
+        <div class="bbox" data-x="{{ comp.bounding_box.x }}" data-y="{{ comp.bounding_box.y }}"
+             data-w="{{ comp.bounding_box.width }}" data-h="{{ comp.bounding_box.height }}">
+          <span class="bbox-label">{{ comp.type }} · {{ comp.id }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Generated code -->
+    <div class="panel">
+      <h2>Generated code · {{ target }}</h2>
+      <pre class="code-block">{{ code }}</pre>
+    </div>
+
+    <!-- Cropped components -->
+    <div class="panel full-width">
+      <h2>Extracted components</h2>
+      <div class="components">
+        {% for comp in ast.components %}
+        <div class="component-card">
+          {% if comp.crop_path %}
+          <img src="/{{ comp.crop_path | replace('\\', '/') }}" alt="{{ comp.id }}" />
+          {% endif %}
+          <span class="type-badge">{{ comp.type }}</span>
+          <div class="meta">
+            {{ comp.id }}<br />
+            {{ comp.bounding_box.width }}×{{ comp.bounding_box.height }}px
+            {% if comp.text %}<br />{{ comp.text[:30] }}{% endif %}
+            {% if comp.style.background_color %}
+            <br /><span style="display:inline-block;width:10px;height:10px;background:{{ comp.style.background_color }};border-radius:2px;vertical-align:middle;"></span> {{ comp.style.background_color }}
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Scale bounding boxes to match the rendered image size
+    const img = document.getElementById('orig');
+    function scaleBBoxes() {
+      const scaleX = img.clientWidth / {{ ast.width }};
+      const scaleY = img.clientHeight / {{ ast.height }};
+      document.querySelectorAll('.bbox').forEach(el => {
+        const x = +el.dataset.x, y = +el.dataset.y, w = +el.dataset.w, h = +el.dataset.h;
+        el.style.left   = (x * scaleX) + 'px';
+        el.style.top    = (y * scaleY) + 'px';
+        el.style.width  = (w * scaleX) + 'px';
+        el.style.height = (h * scaleY) + 'px';
+      });
+    }
+    img.addEventListener('load', scaleBBoxes);
+    window.addEventListener('resize', scaleBBoxes);
+    if (img.complete) scaleBBoxes();
+  </script>
+</body>
+</html>

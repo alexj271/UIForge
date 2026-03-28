@@ -1,0 +1,18 @@
+fastapi
+uvicorn[standard]
+python-multipart
+jinja2
+openai
+easyocr
+opencv-python
+Pillow
+python-dotenv
+pydantic
+pydantic-settings
+pytest
+pytest-asyncio
+ruff
+# Florence-2 detector (optional — only needed when DETECTOR=florence2)
+transformers>=4.41.0,<5.0.0
+timm
+einops
