@@ -151,4 +151,15 @@ ruff format .
 
 ## Status
 
-Pipeline wired end-to-end and tested on a real UI screenshot. Grounding DINO detects ~27 components on a complex screen (vs 7 for Florence-2-base). Style extraction and code generation run on all detected components.
+**New pipeline (default)**: Screenshot → detection → nesting filter (top-level only) → crop → vision LLM DSL extraction (gpt-4o) → LLM code generation (gpt-4o) → per-component library files.
+**Legacy pipeline** (`--legacy`): original 5-stage layout-reconstruction pipeline (deprecated).
+
+New env vars: `DSL_MODEL` (default `gpt-4o`), `CODEGEN_MODEL` (default `gpt-4o`), `CONCURRENT_DSL_CALLS` (default `5`).
+Output: `output/<stem>/library/` — one `.dsl.json` + one code file per top-level component.
+
+## Active Technologies
+- Python 3.10+ + FastAPI, Pydantic v2, openai SDK (>=1.0), Pillow, OpenCV, (001-component-library-dsl)
+- Files — `output/<stem>/library/` per run (001-component-library-dsl)
+
+## Recent Changes
+- 001-component-library-dsl: Added Python 3.10+ + FastAPI, Pydantic v2, openai SDK (>=1.0), Pillow, OpenCV,

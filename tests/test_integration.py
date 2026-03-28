@@ -42,7 +42,9 @@ async def test_full_pipeline_on_real_screenshot():
     # Stage 2: segmentation — crop images must be created
     ast = run_segmentation(ast, SAMPLE)
 
-    crops_created = [c for c in ast.components if c.crop_path and Path(c.crop_path).exists()]
+    crops_created = [
+        c for c in ast.components if c.crop_path and Path(c.crop_path).exists()
+    ]
     assert len(crops_created) == len(ast.components), (
         f"Not all crops were created: {len(crops_created)}/{len(ast.components)}"
     )
@@ -53,12 +55,16 @@ async def test_full_pipeline_on_real_screenshot():
 
     styled = [c for c in ast.components if c.style.background_color]
     assert len(styled) > 0, "Style extraction produced no colors"
-    print(f"[style] {len(styled)}/{len(ast.components)} components have background_color")
+    print(
+        f"[style] {len(styled)}/{len(ast.components)} components have background_color"
+    )
 
     # Stage 4: layout reconstruction — result must have at least one root component
     ast = run_layout_reconstruction(ast)
     assert len(ast.components) > 0
-    print(f"[layout] {len(ast.components)} root components after hierarchy reconstruction")
+    print(
+        f"[layout] {len(ast.components)} root components after hierarchy reconstruction"
+    )
 
     # Stage 5: codegen — both targets must produce non-empty output
     for target in ("react_native", "html"):

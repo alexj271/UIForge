@@ -16,5 +16,12 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_base_url: str = "https://api.openai.com/v1"
 
+    # Vision LLM used for DSL extraction from component crops
+    dsl_model: str = "gpt-4o"
+    # LLM used for code generation from ComponentDSL
+    codegen_model: str = "gpt-4o"
+    # Max simultaneous LLM calls during DSL extraction
+    concurrent_dsl_calls: int = 5
+
 
 settings = Settings()

@@ -9,7 +9,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from app.models.ast import StyleInfo, UIComponent, UIJsonAST
+from app.models.ast import StyleInfo, UIJsonAST
 
 
 def run_style_extraction(ast: UIJsonAST) -> UIJsonAST:
@@ -37,6 +37,8 @@ def _dominant_color(image: np.ndarray) -> str:
     # Use k-means with k=1 for the dominant color
     pixels_f = np.float32(pixels)
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-    _, _, centers = cv2.kmeans(pixels_f, 1, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+    _, _, centers = cv2.kmeans(
+        pixels_f, 1, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS
+    )
     b, g, r = centers[0].astype(int)
     return f"#{r:02x}{g:02x}{b:02x}"

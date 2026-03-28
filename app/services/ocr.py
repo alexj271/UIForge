@@ -17,7 +17,9 @@ def init_ocr_reader(languages: list[str] | None = None) -> None:
 
 def get_ocr_reader() -> easyocr.Reader:
     if _reader is None:
-        raise RuntimeError("OCR reader not initialized. Call init_ocr_reader() at startup.")
+        raise RuntimeError(
+            "OCR reader not initialized. Call init_ocr_reader() at startup."
+        )
     return _reader
 
 

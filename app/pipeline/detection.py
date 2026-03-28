@@ -25,7 +25,9 @@ async def run_detection(
     Returns (UIJsonAST, perceived_width, perceived_height).
     Bounding boxes are in perceived pixel space.
     """
-    raw_components, perceived_w, perceived_h = await detect_components(image_path, image_size)
+    raw_components, perceived_w, perceived_h = await detect_components(
+        image_path, image_size
+    )
 
     components: list[UIComponent] = []
     for raw in raw_components:
@@ -42,7 +44,9 @@ async def run_detection(
                     height=bb.get("height", 0),
                 ),
                 text=raw.get("text"),
-                style=StyleInfo(**{k: v for k, v in style_raw.items() if v is not None}),
+                style=StyleInfo(
+                    **{k: v for k, v in style_raw.items() if v is not None}
+                ),
             )
         )
 

@@ -2,7 +2,7 @@ fastapi
 uvicorn[standard]
 python-multipart
 jinja2
-openai
+openai>=1.0
 easyocr
 opencv-python
 Pillow

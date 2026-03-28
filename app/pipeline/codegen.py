@@ -18,6 +18,7 @@ def run_codegen(ast: UIJsonAST, target: Target = "react_native") -> str:
 
 # ── React Native ──────────────────────────────────────────────────────────────
 
+
 def _gen_rn(ast: UIJsonAST) -> str:
     imports = "import React from 'react';\nimport { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';\n"
     body = "\n".join(_rn_component(c, indent=2) for c in ast.components)
@@ -37,15 +38,20 @@ def _rn_component(c: UIComponent, indent: int) -> str:
         return f"{pad}<Image source={{{{ uri: '' }}}} style={{{{ width: {c.bounding_box.width}, height: {c.bounding_box.height} }}}} />"
 
     # container / card / unknown
-    inner = children_code if children_code else (f"{pad}  <Text>{c.text}</Text>" if c.text else "")
+    inner = (
+        children_code
+        if children_code
+        else (f"{pad}  <Text>{c.text}</Text>" if c.text else "")
+    )
     return f"{pad}<View>\n{inner}\n{pad}</View>"
 
 
 # ── HTML ──────────────────────────────────────────────────────────────────────
 
+
 def _gen_html(ast: UIJsonAST) -> str:
     body = "\n".join(_html_component(c, indent=2) for c in ast.components)
-    return f"<div class=\"screen\">\n{body}\n</div>"
+    return f'<div class="screen">\n{body}\n</div>'
 
 
 def _html_component(c: UIComponent, indent: int) -> str:
@@ -61,7 +67,9 @@ def _html_component(c: UIComponent, indent: int) -> str:
     if c.type == "image":
         return f'{pad}<img src="" style="{style}" />'
     if c.type == "input":
-        return f'{pad}<input type="text" placeholder="{c.text or ""}" style="{style}" />'
+        return (
+            f'{pad}<input type="text" placeholder="{c.text or ""}" style="{style}" />'
+        )
 
     inner = children_code if children_code else (f"{pad}  {c.text}" if c.text else "")
     return f'{pad}<div style="{style}">\n{inner}\n{pad}</div>'

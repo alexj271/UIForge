@@ -12,7 +12,13 @@ from app.pipeline.segmentation import run_segmentation
 from app.pipeline.style_extraction import run_style_extraction
 from app.pipeline.layout import run_layout_reconstruction
 from app.pipeline.codegen import run_codegen
-from app.pipeline.artifacts import make_output_dir, save_ast, save_code, save_detection_debug, resize_to_perceived
+from app.pipeline.artifacts import (
+    make_output_dir,
+    save_ast,
+    save_code,
+    save_detection_debug,
+    resize_to_perceived,
+)
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
