@@ -28,7 +28,9 @@ def _build_hierarchy(components: list[UIComponent]) -> list[UIComponent]:
         if parent.id in assigned:
             continue
         for child in sorted_comps[i + 1 :]:
-            if child.id not in assigned and _contains(parent.bounding_box, child.bounding_box):
+            if child.id not in assigned and _contains(
+                parent.bounding_box, child.bounding_box
+            ):
                 parent.children.append(child)
                 assigned.add(child.id)
         roots.append(parent)

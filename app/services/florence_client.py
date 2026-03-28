@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Optional
 
 from PIL import Image
 
@@ -47,11 +46,31 @@ def init_florence(model_id: str = "microsoft/Florence-2-large") -> None:
 _TYPE_KEYWORDS: list[tuple[list[str], str]] = [
     (["button", "btn", "cta", "submit", "click", "tap"], "button"),
     (["icon", "logo", "symbol", "badge", "glyph", "emoji"], "icon"),
-    (["image", "photo", "picture", "thumbnail", "avatar", "banner", "illustration"], "image"),
-    (["input", "field", "textbox", "search bar", "text field", "form", "edittext"], "input"),
+    (
+        ["image", "photo", "picture", "thumbnail", "avatar", "banner", "illustration"],
+        "image",
+    ),
+    (
+        ["input", "field", "textbox", "search bar", "text field", "form", "edittext"],
+        "input",
+    ),
     (["card", "panel", "tile", "chip"], "card"),
     (["text", "label", "title", "heading", "paragraph", "caption", "subtitle"], "text"),
-    (["container", "section", "layout", "background", "header", "footer", "navbar", "nav", "toolbar", "tab bar"], "container"),
+    (
+        [
+            "container",
+            "section",
+            "layout",
+            "background",
+            "header",
+            "footer",
+            "navbar",
+            "nav",
+            "toolbar",
+            "tab bar",
+        ],
+        "container",
+    ),
 ]
 
 
@@ -67,6 +86,7 @@ def _label_to_type(label: str) -> str:
 # Sync inference
 # ---------------------------------------------------------------------------
 
+
 def _run_florence_sync(
     image: Image.Image,
 ) -> tuple[list[dict], int, int]:
@@ -74,7 +94,9 @@ def _run_florence_sync(
     import torch
 
     if _model is None or _processor is None:
-        raise RuntimeError("Florence-2 model not initialised; call init_florence() first")
+        raise RuntimeError(
+            "Florence-2 model not initialised; call init_florence() first"
+        )
 
     w, h = image.size
 
@@ -86,7 +108,9 @@ def _run_florence_sync(
         "button. text label. title heading. icon. navigation bar. tab bar. "
         "card. input field. image. container. header."
     )
-    inputs = _processor(text=task + ui_prompt, images=image, return_tensors="pt").to(_device)
+    inputs = _processor(text=task + ui_prompt, images=image, return_tensors="pt").to(
+        _device
+    )
 
     with torch.inference_mode():
         generated_ids = _model.generate(
@@ -98,7 +122,9 @@ def _run_florence_sync(
             use_cache=False,  # DynamicCache (transformers 4.46+) breaks Florence-2 custom code
         )
 
-    generated_text = _processor.batch_decode(generated_ids, skip_special_tokens=False)[0]
+    generated_text = _processor.batch_decode(generated_ids, skip_special_tokens=False)[
+        0
+    ]
     parsed = _processor.post_process_generation(
         generated_text,
         task=task,
@@ -118,18 +144,20 @@ def _run_florence_sync(
         x2 = max(x1 + 1, min(x2, w))
         y2 = max(y1 + 1, min(y2, h))
 
-        components.append({
-            "id": f"comp_{idx}",
-            "type": _label_to_type(label),
-            "bounding_box": {
-                "x": x1,
-                "y": y1,
-                "width": x2 - x1,
-                "height": y2 - y1,
-            },
-            "text": label,  # pass raw caption as text; OCR will refine it
-            "style": {},
-        })
+        components.append(
+            {
+                "id": f"comp_{idx}",
+                "type": _label_to_type(label),
+                "bounding_box": {
+                    "x": x1,
+                    "y": y1,
+                    "width": x2 - x1,
+                    "height": y2 - y1,
+                },
+                "text": label,  # pass raw caption as text; OCR will refine it
+                "style": {},
+            }
+        )
 
     return components, w, h
 
@@ -138,9 +166,12 @@ def _run_florence_sync(
 # Async entry-point (matches openai_client interface)
 # ---------------------------------------------------------------------------
 
+
 async def detect_components(
     image_path: Path,
-    image_size: tuple[int, int],  # kept for interface parity; Florence reads actual size
+    image_size: tuple[
+        int, int
+    ],  # kept for interface parity; Florence reads actual size
 ) -> tuple[list[dict], int, int]:
     image = Image.open(image_path).convert("RGB")
     loop = asyncio.get_event_loop()

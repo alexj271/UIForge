@@ -19,12 +19,14 @@ async def lifespan(app: FastAPI):
     if settings.detector == "florence2":
         from app.services.florence_client import init_florence
         import asyncio
+
         await asyncio.get_event_loop().run_in_executor(
             None, init_florence, settings.florence_model_id
         )
     elif settings.detector == "groundingdino":
         from app.services.grounding_dino_client import init_grounding_dino
         import asyncio
+
         await asyncio.get_event_loop().run_in_executor(
             None, init_grounding_dino, settings.grounding_dino_model_id
         )

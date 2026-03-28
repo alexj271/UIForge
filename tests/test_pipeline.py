@@ -4,14 +4,19 @@ from app.pipeline.codegen import run_codegen
 
 
 def _make_component(id: str, type: str, x: int, y: int, w: int, h: int) -> UIComponent:
-    return UIComponent(id=id, type=type, bounding_box=BoundingBox(x=x, y=y, width=w, height=h))
+    return UIComponent(
+        id=id, type=type, bounding_box=BoundingBox(x=x, y=y, width=w, height=h)
+    )
 
 
 def _make_ast(*components: UIComponent) -> UIJsonAST:
-    return UIJsonAST(source_image="test.png", width=800, height=600, components=list(components))
+    return UIJsonAST(
+        source_image="test.png", width=800, height=600, components=list(components)
+    )
 
 
 # ── Layout ────────────────────────────────────────────────────────────────────
+
 
 def test_contains_inner_inside_outer():
     outer = BoundingBox(x=0, y=0, width=200, height=200)
@@ -37,6 +42,7 @@ def test_layout_nests_child_inside_container():
 
 
 # ── Codegen ───────────────────────────────────────────────────────────────────
+
 
 def test_codegen_html_contains_button():
     ast = _make_ast(_make_component("btn1", "button", 0, 0, 100, 40))

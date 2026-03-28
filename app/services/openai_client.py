@@ -12,7 +12,9 @@ _client: AsyncOpenAI | None = None
 def get_openai_client() -> AsyncOpenAI:
     global _client
     if _client is None:
-        _client = AsyncOpenAI(api_key=settings.openai_api_key, base_url=settings.openai_base_url)
+        _client = AsyncOpenAI(
+            api_key=settings.openai_api_key, base_url=settings.openai_base_url
+        )
     return _client
 
 
@@ -61,7 +63,9 @@ async def detect_components(
 
     image_data = base64.standard_b64encode(image_path.read_bytes()).decode()
     ext = image_path.suffix.lstrip(".")
-    media_type = f"image/{ext}" if ext in ("png", "jpg", "jpeg", "webp", "gif") else "image/png"
+    media_type = (
+        f"image/{ext}" if ext in ("png", "jpg", "jpeg", "webp", "gif") else "image/png"
+    )
 
     response = await client.chat.completions.create(
         model="gpt-4o",
@@ -85,14 +89,14 @@ async def detect_components(
 
     perceived_w = int(result.get("perceived_width", actual_w))
     perceived_h = int(result.get("perceived_height", actual_h))
-    components  = result.get("components", [])
+    components = result.get("components", [])
 
     # clamp coords to perceived bounds
     for comp in components:
         bb = comp.get("bounding_box", {})
-        x = max(0, min(int(bb.get("x", 0)),     perceived_w - 1))
-        y = max(0, min(int(bb.get("y", 0)),     perceived_h - 1))
-        w = max(1, min(int(bb.get("width",  1)), perceived_w - x))
+        x = max(0, min(int(bb.get("x", 0)), perceived_w - 1))
+        y = max(0, min(int(bb.get("y", 0)), perceived_h - 1))
+        w = max(1, min(int(bb.get("width", 1)), perceived_w - x))
         h = max(1, min(int(bb.get("height", 1)), perceived_h - y))
         bb["x"], bb["y"], bb["width"], bb["height"] = x, y, w, h
 
@@ -102,7 +106,7 @@ async def detect_components(
 def _strip_markdown_fences(text: str) -> str:
     text = text.strip()
     if text.startswith("```"):
-        text = text[text.index("\n") + 1:] if "\n" in text else text[3:]
+        text = text[text.index("\n") + 1 :] if "\n" in text else text[3:]
     if text.endswith("```"):
         text = text[: text.rfind("```")]
     return text.strip()

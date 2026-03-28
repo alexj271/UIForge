@@ -17,18 +17,19 @@ Output structure:
 from pathlib import Path
 
 import cv2
-import numpy as np
 from PIL import Image
 
 from app.models.ast import UIJsonAST
+from app.models.dsl import ComponentDSL, ComponentLibrary
 
 OUTPUT_ROOT = Path("output")
 
 _STAGE_FILES = {
-    "detection":    "01_detection.json",
+    "detection": "01_detection.json",
+    "toplevel": "02_toplevel.json",
     "segmentation": "02_segmentation.json",
-    "style":        "03_style.json",
-    "layout":       "04_layout.json",
+    "style": "03_style.json",
+    "layout": "04_layout.json",
 }
 
 _CODE_EXT = {
@@ -77,21 +78,21 @@ def save_detection_debug(ast: UIJsonAST, image_path: Path, output_dir: Path) -> 
 
     # Generate a distinct color per component type
     _TYPE_COLORS: dict[str, tuple[int, int, int]] = {
-        "button":    (57,  197, 255),   # orange
-        "card":      (86,  219, 108),   # green
-        "text":      (255, 191,   0),   # cyan-yellow
-        "image":     (180,  50, 220),   # purple
-        "icon":      (0,   165, 255),   # amber
-        "container": (200, 200, 200),   # gray
-        "input":     (100, 220, 255),   # yellow
-        "unknown":   (128, 128, 128),   # dark gray
+        "button": (57, 197, 255),  # orange
+        "card": (86, 219, 108),  # green
+        "text": (255, 191, 0),  # cyan-yellow
+        "image": (180, 50, 220),  # purple
+        "icon": (0, 165, 255),  # amber
+        "container": (200, 200, 200),  # gray
+        "input": (100, 220, 255),  # yellow
+        "unknown": (128, 128, 128),  # dark gray
     }
     default_color = (200, 200, 200)
 
-    font      = cv2.FONT_HERSHEY_SIMPLEX
+    font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = max(0.4, img_w / 1800)
-    thickness  = max(1, img_w // 600)
-    pad        = 4  # label background padding
+    thickness = max(1, img_w // 600)
+    pad = 4  # label background padding
 
     for comp in ast.components:
         bb = comp.bounding_box
@@ -122,11 +123,48 @@ def save_detection_debug(ast: UIJsonAST, image_path: Path, output_dir: Path) -> 
         )
         # Dark text on colored background
         text_color = (20, 20, 20)
-        cv2.putText(image, label, (lx, ly), font, font_scale, text_color, thickness, cv2.LINE_AA)
+        cv2.putText(
+            image, label, (lx, ly), font, font_scale, text_color, thickness, cv2.LINE_AA
+        )
 
     out_path = output_dir / "01_detection_debug.jpg"
     cv2.imwrite(str(out_path), image, [cv2.IMWRITE_JPEG_QUALITY, 92])
     return out_path
+
+
+_CODEGEN_EXT = {
+    "react_native": "jsx",
+    "react": "jsx",
+    "html": "html",
+}
+
+
+def save_library(library: ComponentLibrary, output_dir: Path) -> Path:
+    """Save ComponentLibrary to output_dir/03_library.json."""
+    path = output_dir / "03_library.json"
+    path.write_text(library.model_dump_json(indent=2), encoding="utf-8")
+    return path
+
+
+def save_dsl(dsl: ComponentDSL, output_dir: Path) -> Path:
+    """Save an individual ComponentDSL to output_dir/library/<id>.dsl.json."""
+    library_dir = output_dir / "library"
+    library_dir.mkdir(exist_ok=True)
+    path = library_dir / f"{dsl.id}.dsl.json"
+    path.write_text(dsl.model_dump_json(indent=2), encoding="utf-8")
+    return path
+
+
+def save_component_code(
+    code: str, component_id: str, target: str, output_dir: Path
+) -> Path:
+    """Save generated component code to output_dir/library/<id>.<ext>."""
+    library_dir = output_dir / "library"
+    library_dir.mkdir(exist_ok=True)
+    ext = _CODEGEN_EXT.get(target, "txt")
+    path = library_dir / f"{component_id}.{ext}"
+    path.write_text(code, encoding="utf-8")
+    return path
 
 
 def save_code(code: str, target: str, output_dir: Path) -> Path:

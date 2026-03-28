@@ -33,8 +33,14 @@ _TYPE_KEYWORDS: list[tuple[list[str], str]] = [
     (["icon", "logo", "badge", "symbol"], "icon"),
     (["statistics card", "circular badge", "card", "tile", "chip", "panel"], "card"),
     (["input", "field", "textbox", "search"], "input"),
-    (["navigation bar", "nav bar", "navbar", "header", "footer", "tab bar"], "container"),
-    (["title", "heading", "text label", "label", "text", "caption", "subtitle"], "text"),
+    (
+        ["navigation bar", "nav bar", "navbar", "header", "footer", "tab bar"],
+        "container",
+    ),
+    (
+        ["title", "heading", "text label", "label", "text", "caption", "subtitle"],
+        "text",
+    ),
     (["image", "photo", "picture", "thumbnail", "avatar", "banner"], "image"),
     (["container", "section", "layout", "background"], "container"),
 ]
@@ -70,7 +76,9 @@ def _run_grounding_dino_sync(
     import torch
 
     if _model is None or _processor is None:
-        raise RuntimeError("Grounding DINO not initialised; call init_grounding_dino() first")
+        raise RuntimeError(
+            "Grounding DINO not initialised; call init_grounding_dino() first"
+        )
 
     w, h = image.size
 
@@ -91,7 +99,7 @@ def _run_grounding_dino_sync(
         target_sizes=[(h, w)],
     )[0]
 
-    boxes = results["boxes"].tolist()    # [[x1,y1,x2,y2], ...] absolute px
+    boxes = results["boxes"].tolist()  # [[x1,y1,x2,y2], ...] absolute px
     scores = results["scores"].tolist()
     labels = results["labels"]
 
@@ -103,19 +111,21 @@ def _run_grounding_dino_sync(
         x2 = max(x1 + 1, min(x2, w))
         y2 = max(y1 + 1, min(y2, h))
 
-        components.append({
-            "id": f"comp_{idx}",
-            "type": _phrase_to_type(label),
-            "bounding_box": {
-                "x": x1,
-                "y": y1,
-                "width": x2 - x1,
-                "height": y2 - y1,
-            },
-            "text": label,
-            "style": {},
-            "_score": round(score, 3),
-        })
+        components.append(
+            {
+                "id": f"comp_{idx}",
+                "type": _phrase_to_type(label),
+                "bounding_box": {
+                    "x": x1,
+                    "y": y1,
+                    "width": x2 - x1,
+                    "height": y2 - y1,
+                },
+                "text": label,
+                "style": {},
+                "_score": round(score, 3),
+            }
+        )
 
     # Sort by confidence descending
     components.sort(key=lambda c: c.pop("_score"), reverse=True)
