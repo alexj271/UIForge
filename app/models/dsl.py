@@ -51,15 +51,21 @@ class TextDSL(BaseModel):
 
 
 class IconDSL(BaseModel):
-    name: Optional[str] = None  # recognizable name e.g. "search", "home", "chevron-right"
+    name: Optional[str] = (
+        None  # recognizable name e.g. "search", "home", "chevron-right"
+    )
     color: Optional[str] = None  # hex
     size: Optional[float] = None  # px (approximate)
 
 
 class LayoutDSL(BaseModel):
     direction: str = "column"  # "row" | "column" | "stack"
-    align_items: Optional[str] = None  # "flex-start" | "center" | "flex-end" | "stretch"
-    justify_content: Optional[str] = None  # "flex-start" | "center" | "space-between" | "space-around"
+    align_items: Optional[str] = (
+        None  # "flex-start" | "center" | "flex-end" | "stretch"
+    )
+    justify_content: Optional[str] = (
+        None  # "flex-start" | "center" | "space-between" | "space-around"
+    )
     gap: Optional[float] = None  # spacing between children in px
     padding_top: Optional[float] = None
     padding_right: Optional[float] = None

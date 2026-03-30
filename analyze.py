@@ -59,6 +59,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run the original 5-stage layout-reconstruction pipeline (deprecated)",
     )
+    parser.add_argument(
+        "--no-filter",
+        action="store_true",
+        help="Disable nesting/duplicate filter — process all detected components",
+    )
     return parser.parse_args()
 
 
@@ -94,6 +99,13 @@ async def run_library(args: argparse.Namespace) -> None:
             f"  [init] loading Grounding DINO ({settings.grounding_dino_model_id})..."
         )
         init_grounding_dino(settings.grounding_dino_model_id)
+    elif settings.detector == "omniparser":
+        from app.services.omniparser_client import init_omniparser
+
+        print(
+            f"  [init] loading OmniParser v2 (weights: {settings.omniparser_model_dir})..."
+        )
+        init_omniparser(settings.omniparser_model_dir)
 
     # [1/4] Detection
     print(f"  [1/4] detecting components via {settings.detector}...")
@@ -108,14 +120,18 @@ async def run_library(args: argparse.Namespace) -> None:
     )
 
     # [2/4] Nesting filter
-    print("  [2/4] filtering to top-level components...")
-    toplevel_ast = run_nesting_filter(ast)
-    excluded = len(ast.components) - len(toplevel_ast.components)
-    artifact = save_ast(toplevel_ast, "toplevel", output_dir)
-    print(
-        f"        {len(toplevel_ast.components)} top-level"
-        f"  ({excluded} nested excluded)  →  {artifact.name}"
-    )
+    if args.no_filter:
+        print("  [2/4] nesting filter disabled — using all detected components")
+        toplevel_ast = ast
+    else:
+        print("  [2/4] filtering to top-level components...")
+        toplevel_ast = run_nesting_filter(ast)
+        excluded = len(ast.components) - len(toplevel_ast.components)
+        artifact = save_ast(toplevel_ast, "toplevel", output_dir)
+        print(
+            f"        {len(toplevel_ast.components)} top-level"
+            f"  ({excluded} nested excluded)  →  {artifact.name}"
+        )
 
     # Crop top-level components only
     from app.services.ocr import init_ocr_reader
@@ -206,6 +222,13 @@ async def run_legacy(args: argparse.Namespace) -> None:
             f"  [init] loading Grounding DINO ({settings.grounding_dino_model_id})..."
         )
         init_grounding_dino(settings.grounding_dino_model_id)
+    elif settings.detector == "omniparser":
+        from app.services.omniparser_client import init_omniparser
+
+        print(
+            f"  [init] loading OmniParser v2 (weights: {settings.omniparser_model_dir})..."
+        )
+        init_omniparser(settings.omniparser_model_dir)
 
     print(f"  [1/5] detecting components via {settings.detector}...")
     ast, perceived_w, perceived_h = await run_detection(image_path, (width, height))

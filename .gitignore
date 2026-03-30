@@ -7,3 +7,4 @@ uploads/
 output/
 .ruff_cache/
 .pytest_cache/
+weights/

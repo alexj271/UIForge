@@ -50,7 +50,9 @@ def _is_nested(component_id: str, bbox: BoundingBox, all_components: list) -> bo
     return False
 
 
-def _near_duplicate(a: BoundingBox, b: BoundingBox, tol: int = NEAR_DUPLICATE_TOL) -> bool:
+def _near_duplicate(
+    a: BoundingBox, b: BoundingBox, tol: int = NEAR_DUPLICATE_TOL
+) -> bool:
     """Return True if two bboxes are within *tol* pixels on every edge."""
     return (
         abs(a.x - b.x) <= tol

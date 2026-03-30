@@ -13,10 +13,12 @@ UIForge converts UI screenshots into structured components and generates React N
 - **Grounding DINO** (`IDEA-Research/grounding-dino-base`) — default detector; open-vocabulary zero-shot UI element detection via text prompt
 - **Florence-2** (`microsoft/Florence-2-base`) — alternative local detector; phrase-grounding task
 - **OpenAI Vision API** (`gpt-4o`) — optional detector; highest accuracy but requires API key
+- **OmniParser v2** (`microsoft/OmniParser-v2.0`) — local YOLOv8 icon detector + optional Florence-2 captioner; specialised for interactable UI elements
 - **EasyOCR** — text extraction from cropped components
 - **OpenCV** (`opencv-python`) — image preprocessing
 - **Pillow** — image loading and manipulation
-- **transformers** (`>=4.41,<5.0`) — used by both Grounding DINO and Florence-2 backends
+- **transformers** (`>=4.41,<5.0`) — used by Grounding DINO, Florence-2, and OmniParser backends
+- **ultralytics** — YOLOv8 inference used by OmniParser backend
 
 ## Architecture
 
@@ -27,7 +29,7 @@ Screenshot
    ↓
 Image Preprocessing (OpenCV / Pillow)
    ↓
-UI Detection ─── pluggable backend (Grounding DINO | Florence-2 | OpenAI Vision)
+UI Detection ─── pluggable backend (Grounding DINO | Florence-2 | OpenAI Vision | OmniParser)
    ↓
 Component Segmentation → cropped component images + bounding boxes
    │
@@ -53,6 +55,7 @@ Configured via `DETECTOR` env var (or `app/config.py` default):
 | Grounding DINO | `groundingdino` | `IDEA-Research/grounding-dino-base` | **Default.** Best recall on UI screenshots. Open-vocabulary via text prompt. |
 | Florence-2 | `florence2` | `microsoft/Florence-2-base` | Local. Uses `<CAPTION_TO_PHRASE_GROUNDING>` task. Lighter but less complete. |
 | OpenAI Vision | `openai` | `gpt-4o` | Requires `OPENAI_API_KEY`. Best semantic accuracy + style info. |
+| OmniParser v2 | `omniparser` | `microsoft/OmniParser-v2.0` | Local YOLOv8 + Florence-2 captioner. Specialised for interactable UI elements. Weights must be downloaded first (see below). |
 
 All backends expose the same async interface:
 ```python
@@ -130,6 +133,10 @@ python analyze.py tests/assets/example1.jpg --target react_native
 DETECTOR=groundingdino python analyze.py <image>
 DETECTOR=florence2     python analyze.py <image>
 DETECTOR=openai        OPENAI_API_KEY=sk-... python analyze.py <image>
+DETECTOR=omniparser    python analyze.py <image>   # weights must be in ./weights/
+
+# Download OmniParser weights (one-time setup)
+huggingface-cli download microsoft/OmniParser-v2.0 --local-dir weights --repo-type model
 
 # Web server
 uvicorn app.main:app --reload

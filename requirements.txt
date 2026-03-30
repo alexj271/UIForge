@@ -12,7 +12,9 @@ pydantic-settings
 pytest
 pytest-asyncio
 ruff
-# Florence-2 detector (optional — only needed when DETECTOR=florence2)
+# Florence-2 / Grounding DINO detectors (optional)
 transformers>=4.41.0,<5.0.0
 timm
 einops
+# OmniParser detector (optional — only needed when DETECTOR=omniparser)
+ultralytics

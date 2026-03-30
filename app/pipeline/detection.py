@@ -1,6 +1,7 @@
 """
 Stage 1: UI Detection
-Detects UI components using the configured backend (openai | florence2 | groundingdino)
+Detects UI components using the configured backend
+(openai | florence2 | groundingdino | omniparser)
 and returns the UI JSON AST plus the image size used for coordinates.
 """
 
@@ -13,6 +14,8 @@ if settings.detector == "florence2":
     from app.services.florence_client import detect_components
 elif settings.detector == "groundingdino":
     from app.services.grounding_dino_client import detect_components
+elif settings.detector == "omniparser":
+    from app.services.omniparser_client import detect_components
 else:
     from app.services.openai_client import detect_components
 

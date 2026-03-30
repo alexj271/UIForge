@@ -6,12 +6,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
-    # Which detector backend to use: "openai" | "florence2" | "groundingdino"
-    detector: Literal["openai", "florence2", "groundingdino"] = "groundingdino"
+    # Which detector backend to use: "openai" | "florence2" | "groundingdino" | "omniparser"
+    detector: Literal["openai", "florence2", "groundingdino", "omniparser"] = (
+        "groundingdino"
+    )
     # Florence-2 model ID (override to use Florence-2-base for lighter footprint)
     florence_model_id: str = "microsoft/Florence-2-large"
     # Grounding DINO model ID ("grounding-dino-tiny" for speed)
     grounding_dino_model_id: str = "IDEA-Research/grounding-dino-base"
+    # OmniParser weights directory (microsoft/OmniParser-v2.0 downloaded locally)
+    omniparser_model_dir: str = "weights"
 
     openai_api_key: str = ""
     openai_base_url: str = "https://api.openai.com/v1"
